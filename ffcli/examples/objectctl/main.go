@@ -2,6 +2,7 @@ package main
 
 import (
 	"bufio"
+	"context"
 	"flag"
 	"log"
 	"os"
@@ -32,7 +33,7 @@ func main() {
 		Usage:     "objectctl create [flags] <object ID>",
 		ShortHelp: "create an object",
 		FlagSet:   createFlags,
-		Exec: func(args []string) error {
+		Exec: func(_ context.Context, args []string) error {
 			if len(args) != 1 {
 				return xerrors.New("create requires 1 argument")
 			}
@@ -49,7 +50,7 @@ func main() {
 			Delete without any arguments recursively deletes all objects.
 			Obviously, be careful.
 		`, 60),
-		Exec: func(args []string) error {
+		Exec: func(_ context.Context, args []string) error {
 			if len(args) <= 0 {
 				return objectCache.deleteAll(*globalToken)
 			}
@@ -68,12 +69,12 @@ func main() {
 			could go here.
 		`, 78),
 		Subcommands: []*ffcli.Command{create, delete},
-		Exec: func([]string) error {
+		Exec: func(context.Context, []string) error {
 			return xerrors.New("specify a subcommand")
 		},
 	}
 
-	if err := root.Run(os.Args[1:]); err != nil {
+	if err := root.Run(context.Background(), os.Args[1:]); err != nil {
 		log.Fatalf("error: %v", err)
 	}
 }
